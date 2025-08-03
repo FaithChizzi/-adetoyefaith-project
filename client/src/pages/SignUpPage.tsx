@@ -1,43 +1,39 @@
-
 import React, { useState } from 'react';
 import axios from '../api/axios';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../styles/LoginSignup.css';
 
-const LoginPage = () => {
+const SignUpPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [role, setRole] = useState('mentee'); // or 'mentor'
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     try {
-      // ✅ FIXED: Removed extra /api
-      const res = await axios.post('/login', { email, password });
+      const res = await axios.post('/register', { email, password, role });
 
-      const { token, role } = res.data;
-
-      if (!token || !role) {
-        setError('Invalid response from server');
-        return;
+      if (res.status === 201) {
+        setSuccess('Account created successfully. You can now log in.');
+        setTimeout(() => {
+          navigate('/login'); // redirect to login page
+        }, 1500);
       }
-
-      login(token); // Save token in context + localStorage
-      navigate(`/${role}`);
     } catch (err: any) {
-      console.error('Login failed:', err);
-      setError('Invalid email or password');
+      console.error('Signup failed:', err);
+      setError('Signup failed. Email may already exist.');
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
+      <h2>Sign Up</h2>
       <input
         type="email"
         placeholder="Email"
@@ -54,15 +50,20 @@ const LoginPage = () => {
         required
       />
       <br /><br />
-      <button type="submit">Login</button>
+      <select value={role} onChange={e => setRole(e.target.value)} required>
+        <option value="mentee">Mentee</option>
+        <option value="mentor">Mentor</option>
+      </select>
       <br /><br />
+      <button type="submit">Sign Up</button>
+      <br />
       <p className="switch">
-        Don't have an account? <a href="/signup">Sign up</a>
+        Already have an account? <a href="/login">Login</a>
       </p>
-
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {success && <p style={{ color: 'green' }}>{success}</p>}
     </form>
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

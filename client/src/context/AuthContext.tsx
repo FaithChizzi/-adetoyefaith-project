@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { jwtDecode } from 'jwt-decode'; // ✅ Correct import
+import { jwtDecode } from 'jwt-decode'; // Make sure this is installed
 
 interface DecodedToken {
   role: string;
@@ -13,9 +13,12 @@ interface AuthContextType {
   logout: () => void;
 }
 
+// ✅ Context Initialization
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// ✅ Provider
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // ✅ Token Persistence & Role Extraction
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [role, setRole] = useState<string | null>(() => {
     const stored = localStorage.getItem('token');
@@ -26,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
+  // ✅ login() Function
   const login = (newToken: string) => {
     localStorage.setItem('token', newToken);
     setToken(newToken);
@@ -36,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // ✅ logout() Function
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -49,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// ✅ Hook to use context safely
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within AuthProvider');
